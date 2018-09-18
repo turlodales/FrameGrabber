@@ -25,7 +25,7 @@ class AlbumCell: UICollectionViewCell {
 
     private func configureViews() {
         imageView.backgroundColor = Style.Color.missingThumbnail
-        imageView.layer.cornerRadius = 4
+        imageView.layer.cornerRadius = Style.Size.thumbnailCornerRadius
         selectedBackgroundView = UIView()
         selectedBackgroundView?.backgroundColor = Style.Color.missingThumbnail
     }

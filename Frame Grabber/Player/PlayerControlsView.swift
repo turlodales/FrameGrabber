@@ -4,9 +4,10 @@ class PlayerControlsView: GradientView {
 
     @IBOutlet var timeSlider: TimeSlider!
     @IBOutlet var timeLabel: UILabel!
-    @IBOutlet var shareButton: UIButton!
     @IBOutlet var closeButton: UIButton!
     @IBOutlet var playButton: UIButton!
+    @IBOutlet var addFrameButton: UIButton!
+    @IBOutlet var shareButton: UIButton!
     @IBOutlet var previousButton: RepeatingButton!
     @IBOutlet var nextButton: RepeatingButton!
 
@@ -24,8 +25,9 @@ class PlayerControlsView: GradientView {
     func setControlsEnabled(_ enabled: Bool) {
         timeSlider.isEnabled = enabled
         timeLabel.isEnabled = enabled
-        shareButton.isEnabled = enabled
         playButton.isEnabled = enabled
+        addFrameButton.isEnabled = enabled
+        shareButton.isEnabled = enabled
         nextButton.isEnabled = enabled
         previousButton.isEnabled = enabled
     }

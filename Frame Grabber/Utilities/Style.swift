@@ -16,6 +16,7 @@ struct Style {
 
     struct Size {
         static let buttonCornerRadius: CGFloat = 8
+        static let thumbnailCornerRadius: CGFloat = 4
     }
 
     static func configureAppearance(using window: UIWindow?) {

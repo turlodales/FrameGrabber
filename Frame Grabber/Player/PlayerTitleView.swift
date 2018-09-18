@@ -23,7 +23,7 @@ class PlayerTitleView: GradientView {
     }
 
     private func configureViews() {
-        isUserInteractionEnabled = false
+        titleLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 18, weight: .bold)
         colors = Style.Color.overlayTopGradient
         applyOverlayShadow()
     }

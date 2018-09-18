@@ -16,9 +16,6 @@
 /* Class = "UITableViewSection"; headerTitle = "Support"; ObjectID = "AUQ-0N-u0e"; */
 "AUQ-0N-u0e.headerTitle" = "Support";
 
-/* Class = "UILabel"; text = "Pick a Frame"; ObjectID = "bP2-FO-hcM"; */
-"bP2-FO-hcM.text" = "Bild Auswählen";
-
 /* Class = "UILabel"; text = "Rate the App!"; ObjectID = "c4F-LF-kQ4"; */
 "c4F-LF-kQ4.text" = "App Bewerten!";
 

@@ -43,14 +43,16 @@ class VideoManager {
     // MARK: Frame Generation
 
     /// Generates images synchronously.
-    func currentFrame(for item: AVPlayerItem) -> UIImage? {
+    func currentFrame(for item: AVPlayerItem) -> Frame? {
         let generator = AVAssetImageGenerator(asset: item.asset)
         generator.requestedTimeToleranceBefore = .zero
         generator.requestedTimeToleranceAfter = .zero
         generator.appliesPreferredTrackTransform = true
 
-        let cgImage = try? generator.copyCGImage(at: item.currentTime(), actualTime: nil)
-        return cgImage.flatMap(UIImage.init)
+        let time = item.currentTime()
+        guard let cgImage = try? generator.copyCGImage(at: time, actualTime: nil) else { return nil }
+
+        return Frame(time: time, image: UIImage(cgImage: cgImage))
     }
 
     // MARK: Metadata Generation

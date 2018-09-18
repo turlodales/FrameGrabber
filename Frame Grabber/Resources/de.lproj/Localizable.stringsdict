@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>player.selectedFramesPlural</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@frames@</string>
+		<key>frames</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>Bild Auswählen</string>
+			<key>one</key>
+			<string>%d Bild Ausgewählt</string>
+			<key>other</key>
+			<string>%d Bilder Ausgewählt</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

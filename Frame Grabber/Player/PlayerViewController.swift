@@ -6,6 +6,7 @@ class PlayerViewController: UIViewController {
     var videoManager: VideoManager!
     var settings = UserDefaults.standard
 
+    private var thumbnailViewController: FrameThumbnailsViewController!
     private var playbackController: PlaybackController?
 
     private lazy var timeFormatter = VideoTimeFormatter()
@@ -25,6 +26,8 @@ class PlayerViewController: UIViewController {
     private var isSeeking: Bool {
         return playbackController?.isSeeking ?? false
     }
+
+    // MARK: - Life Cycle
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
@@ -65,6 +68,13 @@ class PlayerViewController: UIViewController {
         super.viewWillAppear(animated)
         hideStatusBar()
     }
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        guard let destination = segue.destination as? FrameThumbnailsViewController else { return }
+
+        thumbnailViewController = destination
+        thumbnailViewController.delegate = self
+    }
 }
 
 // MARK: - Actions
@@ -79,24 +89,16 @@ private extension PlayerViewController {
 
     @IBAction func playOrPause() {
         guard !isScrubbing else { return }
+
         playbackController?.playOrPause()
+        thumbnailViewController.clearSelection()
     }
 
-    func stepBackward() {
+    func step(byCount count: Int) {
         guard !isScrubbing else { return }
-        playbackController?.step(byCount: -1)
-    }
 
-    func stepForward() {
-        guard !isScrubbing else { return }
-        playbackController?.step(byCount: 1)
-    }
-
-    @IBAction func shareCurrentFrame() {
-        guard !isScrubbing, let item = playbackController?.currentItem else { return }
-
-        playbackController?.pause()
-        generateCurrentFrameAndShare(for: item)
+        playbackController?.step(byCount: count)
+        thumbnailViewController.clearSelection()
     }
 
     @IBAction func scrub(_ sender: TimeSlider) {
@@ -104,6 +106,43 @@ private extension PlayerViewController {
         // When scrubbing, display slider time instead of player time.
         updateSlider(withTime: sender.time)
         updateTimeLabel(withTime: sender.time)
+        thumbnailViewController.clearSelection()
+    }
+
+    func showFrame(_ frame: Frame) {
+        guard !isScrubbing else { return }
+
+        playbackController?.pause()
+        playbackController?.seeker.cancelPendingSeeks()
+        playbackController?.seeker.smoothlySeek(to: frame.time)
+    }
+
+    @IBAction func addFrame() {
+        guard !isScrubbing,
+            let item = playbackController?.currentItem else { return }
+
+        guard let frame = videoManager.currentFrame(for: item) else {
+            presentAlert(.imageGenerationFailed())
+            return
+        }
+
+        thumbnailViewController.insertFrame(frame)
+        updateTitle()
+    }
+
+    @IBAction func shareFrames() {
+        guard !isScrubbing else { return }
+
+        playbackController?.pause()
+
+        let selectedFrames = thumbnailViewController.frames
+
+        if selectedFrames.isEmpty {
+            guard let item = playbackController?.currentItem else { return }
+            generateCurrentFrameAndShare(for: item)
+        } else {
+            shareFrames(selectedFrames)
+        }
     }
 }
 
@@ -156,6 +195,15 @@ extension PlayerViewController: ZoomingPlayerViewDelegate {
     }
 }
 
+// MARK: - FramesViewControllerDelegate
+
+extension PlayerViewController: FrameThumbnailsViewControllerDelegate {
+
+    func controller(_ controller: FrameThumbnailsViewController, didSelectFrame frame: Frame, atIndex index: Int) {
+        showFrame(frame)
+    }
+}
+
 // MARK: - Private
 
 private extension PlayerViewController {
@@ -164,11 +212,11 @@ private extension PlayerViewController {
         playerView.delegate = self
 
         controlsView.previousButton.repeatAction = { [weak self] in
-            self?.stepBackward()
+            self?.step(byCount: -1)
         }
 
         controlsView.nextButton.repeatAction = { [weak self] in
-            self?.stepForward()
+            self?.step(byCount: 1)
         }
 
         configureGestures()
@@ -181,6 +229,7 @@ private extension PlayerViewController {
         updateDetailLabels()
         updateLoadingProgress(with: nil)
         updatePreviewImage()
+        updateTitle()
     }
 
     func configureGestures() {
@@ -206,6 +255,12 @@ private extension PlayerViewController {
     }
 
     // MARK: Sync Player UI
+
+    func updateTitle() {
+        let selectedFrames = thumbnailViewController.frames
+        let format = NSLocalizedString("player.selectedFramesPlural", comment: "")
+        titleView.titleLabel.text = String.localizedStringWithFormat(format, selectedFrames.count)
+    }
 
     func updatePlaybackStatus() {
         let isReadyToPlay = playbackController?.isReadyToPlay ?? false
@@ -250,7 +305,7 @@ private extension PlayerViewController {
     }
 
     func updateSlider(withTime time: CMTime) {
-        guard !isScrubbing && !isSeeking else { return }
+        guard !isScrubbing else { return }
         controlsView.timeSlider.time = time
     }
 
@@ -301,27 +356,30 @@ private extension PlayerViewController {
     // MARK: Image Generation
 
     func generateCurrentFrameAndShare(for item: AVPlayerItem) {
-        guard let image = videoManager.currentFrame(for: item) else {
+        guard let frame = videoManager.currentFrame(for: item) else {
             presentAlert(.imageGenerationFailed())
             return
         }
 
-        shareImage(image)
+        shareFrames([frame])
     }
 
-    func shareImage(_ image: UIImage) {
-        // If creation fails, share plain image without metadata.
-        if settings.includeMetadata,
-            let metadataImage = videoManager.jpegData(byAddingAssetMetadataTo: image, compressionQuality: 1) {
-
-            shareItem(metadataImage)
-        } else {
-            shareItem(image)
+    func shareFrames(_ frames: [Frame]) {
+        if !settings.includeMetadata {
+            shareItems(frames.map { $0.image })
+            return
         }
+
+        // If creation fails, share plain images without metadata.
+        let metadataFrames = frames.map { (frame: Frame) -> Any in
+            videoManager.jpegData(byAddingAssetMetadataTo: frame.image, compressionQuality: 1) ?? frame.image
+        }
+
+        shareItems(metadataFrames)
     }
 
-    func shareItem(_ item: Any) {
-        let shareController = UIActivityViewController(activityItems: [item], applicationActivities: nil)
+    func shareItems(_ items: [Any]) {
+        let shareController = UIActivityViewController(activityItems: items, applicationActivities: nil)
         present(shareController, animated: true)
     }
 }
