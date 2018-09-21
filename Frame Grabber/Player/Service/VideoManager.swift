@@ -5,6 +5,10 @@ class VideoManager {
 
     let asset: PHAsset
 
+    var pixelSize: CGSize {
+        return CGSize(width: asset.pixelWidth, height: asset.pixelHeight)
+    }
+
     private let imageManager: PHImageManager
     private(set) var imageRequest: ImageRequest?
     private(set) var videoRequest: ImageRequest?

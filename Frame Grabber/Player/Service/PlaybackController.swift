@@ -1,25 +1,17 @@
 import AVKit
 
-protocol PlaybackControllerDelegate: PlayerObserverDelegate {}
-
 /// Manages looped playback for a single player item.
 class PlaybackController {
 
-    /// For now, the controller forwards player observer calls.
-    weak var delegate: PlaybackControllerDelegate? {
-        didSet { observer.delegate = delegate }
-    }
-
     let player: AVPlayer
     let seeker: PlayerSeeker
+    private(set) lazy var observers = PlayerObservations(player: self.player)
     private let looper: AVPlayerLooper
-    private let observer: PlayerObserver
 
     init(playerItem: AVPlayerItem, player: AVQueuePlayer = .init()) {
         self.player = player
         self.looper = AVPlayerLooper(player: player, templateItem: playerItem)
         self.seeker = PlayerSeeker(player: player)
-        self.observer = PlayerObserver(player: player)
     }
 
     // MARK: Status
@@ -47,7 +39,6 @@ class PlaybackController {
         return player.currentItem
     }
 
-    /// This property can change during playback.
     var frameRate: Float? {
         return currentItem?.asset.tracks(withMediaType: .video).first?.nominalFrameRate
     }

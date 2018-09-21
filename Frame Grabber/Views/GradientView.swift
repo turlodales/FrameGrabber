@@ -1,6 +1,6 @@
 import UIKit
 
-class GradientView: UIView {
+class GradientView: PassThroughView {
 
     override static var layerClass: AnyClass {
         return CAGradientLayer.self

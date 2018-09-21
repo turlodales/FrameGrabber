@@ -11,11 +11,11 @@ class PlayerLoadingView: UIView {
         configureViews()
     }
 
-    func setProgress(_ progress: Float?, animated: Bool) {
-        let hide = progress == nil
+    func showProgress(_ progress: Float?, animated: Bool) {
+        let shouldHide = progress == nil
         progressView.setProgress(progress ?? 0, animated: animated)
-        progressView.isHidden = hide
-        titleLabel.isHidden = hide
+        progressView.setHidden(shouldHide, animated: animated)
+        titleLabel.setHidden(shouldHide, animated: animated)
     }
 
     private func configureViews() {
@@ -24,5 +24,6 @@ class PlayerLoadingView: UIView {
         progressView.trackTintColor = .white
         progressView.layer.cornerRadius = 4
         progressView.layer.masksToBounds = true
+        showProgress(nil, animated: false)
     }
 }

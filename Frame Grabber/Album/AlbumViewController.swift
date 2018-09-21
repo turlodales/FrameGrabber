@@ -30,12 +30,12 @@ class AlbumViewController: UICollectionViewController {
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let controller = segue.destination as? PlayerViewController {
+        if let controller = segue.destination as? PlayerContainerController {
             prepareForPlayerSegue(with: controller)
         }
     }
 
-    private func prepareForPlayerSegue(with destination: PlayerViewController) {
+    private func prepareForPlayerSegue(with destination: PlayerContainerController) {
         guard let selectedIndexPath = collectionView?.indexPathsForSelectedItems?.first else { fatalError("Segue without selection or asset") }
 
         transitionController.prepareTransition(forSource: self, destination: destination)

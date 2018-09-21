@@ -24,3 +24,13 @@ extension UIView {
         setHidden(!isHidden, animated: animated)
     }
 }
+
+extension UIViewController {
+    func setHidden(_ hidden: Bool, animated: Bool, duration: TimeInterval = 0.2) {
+        view.setHidden(hidden, animated: animated, duration: duration)
+    }
+
+    func toggleHidden(animated: Bool) {
+        view.toggleHidden(animated: animated)
+    }
+}
