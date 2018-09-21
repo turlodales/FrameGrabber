@@ -3,6 +3,7 @@ import UIKit
 class FrameCell: UICollectionViewCell {
 
     @IBOutlet var imageView: UIImageView!
+    @IBOutlet var deleteButton: UIButton!
     var selectionView = UIView()
 
     override func awakeFromNib() {
@@ -16,16 +17,14 @@ class FrameCell: UICollectionViewCell {
     }
 
     override var isSelected: Bool {
-        didSet { selectionView.setHidden(!isSelected, animated: true) }
+        didSet {
+            deleteButton.setHidden(!isSelected, animated: true)
+        }
     }
 
     private func configureViews() {
-        selectionView.isHidden = true
-        selectionView.frame = bounds
-        selectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        selectionView.backgroundColor = nil
-        selectionView.layer.borderColor = UIColor.white.cgColor
-        selectionView.layer.borderWidth = 2
-        addSubview(selectionView)
+        deleteButton.isHidden = true
+        deleteButton.backgroundColor = UIColor.black.withAlphaComponent(0.4)
+        deleteButton.applyOverlayShadow()
     }
 }

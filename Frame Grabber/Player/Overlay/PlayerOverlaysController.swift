@@ -82,7 +82,6 @@ private extension PlayerOverlaysController {
     @IBAction func addCurrentFrame() {
         generateCurrentFrame {
             selectedFramesViewController.insertFrame($0)
-            updateSelection()
         }
     }
 
@@ -139,8 +138,16 @@ private extension PlayerOverlaysController {
 
 extension PlayerOverlaysController: FrameThumbnailsViewControllerDelegate {
 
-    func controller(_ controller: FrameThumbnailsViewController, didSelectFrame frame: Frame, atIndex index: Int) {
-        showFrame(frame)
+    func controllerSelectionChanged(_ controller: FrameThumbnailsViewController) {
+        if let frame = selectedFramesViewController.selectedFrame {
+            showFrame(frame)
+        }
+
+        updateFrameSelection()
+    }
+
+    func controllerFramesChanged(_ controller: FrameThumbnailsViewController) {
+        updateFrameSelection()
     }
 }
 
@@ -188,14 +195,15 @@ private extension PlayerOverlaysController {
 
         controlsView.playButton.setTimeControlStatus(.paused)
         updateViews(withTime: .zero)
-        updateTitle()
-        updateSubtitles()
+        updateFrameSelection()
         updateControlsEnabled()
     }
 
     func updateControlsEnabled() {
         let isReady = playbackController?.isReadyToPlay ?? false
+        let canAddFrame = selectedFramesViewController.selectedFrame == nil
         controlsView.setControlsEnabled(isReady)
+        controlsView.addFrameButton.isEnabled = isReady && canAddFrame
     }
 
     func updateViews(withTime time: CMTime) {
@@ -208,9 +216,10 @@ private extension PlayerOverlaysController {
         }
     }
 
-    func updateSelection() {
+    func updateFrameSelection() {
+        updateControlsEnabled()
         updateTitle()
-        titleView.subtitleStack.setHidden(hasSelection, animated: false)
+        updateSubtitles()
         selectedFramesViewController.setHidden(!hasSelection, animated: false)
     }
 
@@ -226,7 +235,7 @@ private extension PlayerOverlaysController {
             let dimensions = videoManager?.pixelSize,
             let frameRate = playbackController?.frameRate
         else {
-            titleView.subtitleStack.setHidden(true, animated: true)
+            titleView.subtitleStack.setHidden(true, animated: false)
             return
         }
 

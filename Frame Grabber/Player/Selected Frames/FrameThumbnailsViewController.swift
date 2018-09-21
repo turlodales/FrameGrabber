@@ -1,14 +1,22 @@
 import UIKit
 
 protocol FrameThumbnailsViewControllerDelegate: class {
-    func controller(_ controller: FrameThumbnailsViewController, didSelectFrame frame: Frame, atIndex index: Int)
+    func controllerSelectionChanged(_ controller: FrameThumbnailsViewController)
+    func controllerFramesChanged(_ controller: FrameThumbnailsViewController)
 }
 
 class FrameThumbnailsViewController: UICollectionViewController {
 
     weak var delegate: FrameThumbnailsViewControllerDelegate?
 
-    private(set) var frames = [Frame]()
+    private(set) var frames = [Frame]() {
+        didSet { delegate?.controllerFramesChanged(self) }
+    }
+
+    var selectedFrame: Frame? {
+        return collectionView.indexPathsForSelectedItems?.first.flatMap { frames[$0.item] }
+    }
+
     private let cellId = String(describing: FrameCell.self)
 
     override func viewDidLoad() {
@@ -22,11 +30,6 @@ class FrameThumbnailsViewController: UICollectionViewController {
 
     // MARK: - Managing Frames
 
-    func setFrames(_ frames: [Frame]) {
-        self.frames = frames
-        collectionView.reloadSections([0])
-    }
-
      /// Frames are inserted in sorted order by time.
     func insertFrame(_ frame: Frame) {
         let index = frames.firstIndex { frame.time < $0.time } ?? frames.count
@@ -37,24 +40,28 @@ class FrameThumbnailsViewController: UICollectionViewController {
         collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
     }
 
-    func removeFrame(at index: Int) {
-        frames.remove(at: index)
-        let index = IndexPath(item: index, section: 0)
-        collectionView.deleteItems(at: [index])
-    }
+    @IBAction func removeFrame(_ sender: UIButton) {
+        guard let cell = sender.firstSuperview(of: UICollectionViewCell.self),
+            let indexPath = collectionView.indexPath(for: cell) else { return }
 
-    var selectedIndex: Int? {
-        return collectionView.indexPathsForSelectedItems?.first?.item
+        clearSelection()
+        frames.remove(at: indexPath.item)
+        collectionView.deleteItems(at: [indexPath])
     }
 
     func clearSelection() {
         collectionView.selectItem(at: nil, animated: true, scrollPosition: .top)
+        delegate?.controllerSelectionChanged(self)
     }
 
     // MARK: UICollectionViewDataSource/UICollectionViewDelegate
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        delegate?.controller(self, didSelectFrame: frames[indexPath.item], atIndex: indexPath.item)
+        delegate?.controllerSelectionChanged(self)
+    }
+
+    override func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        delegate?.controllerSelectionChanged(self)
     }
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -68,5 +75,12 @@ class FrameThumbnailsViewController: UICollectionViewController {
         cell.imageView.image = frame.image
 
         return cell
+    }
+}
+
+private extension UIView {
+    func firstSuperview<T>(of type: T.Type) -> T? {
+        return (superview as? T)
+            ?? superview?.firstSuperview(of: T.self)
     }
 }
