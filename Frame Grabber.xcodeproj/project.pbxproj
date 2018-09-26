@@ -35,6 +35,8 @@
 		0044020B215306F100C420CE /* PlayerContainerController+Transition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004402092153055300C420CE /* PlayerContainerController+Transition.swift */; };
 		004427B1215BB36D008D788E /* PlayerLoadingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004427B0215BB36D008D788E /* PlayerLoadingViewController.swift */; };
 		004427B2215BB4D7008D788E /* PlayerLoadingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004427B0215BB36D008D788E /* PlayerLoadingViewController.swift */; };
+		004427B4215BE308008D788E /* SpinnerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004427B3215BE308008D788E /* SpinnerViewController.swift */; };
+		004427B5215BE317008D788E /* SpinnerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004427B3215BE308008D788E /* SpinnerViewController.swift */; };
 		0058E354213D645900BE28DD /* ZoomAnimatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0058E353213D645900BE28DD /* ZoomAnimatable.swift */; };
 		0058E356213D9AE900BE28DD /* UIViewControllerContextTransitioning+Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0058E355213D9AE900BE28DD /* UIViewControllerContextTransitioning+Util.swift */; };
 		005E2AA320273C5800F731FA /* CollectionViewGridLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 005E2AA220273C5800F731FA /* CollectionViewGridLayout.swift */; };
@@ -184,6 +186,7 @@
 		00440206215303EA00C420CE /* PassThroughView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassThroughView.swift; sourceTree = "<group>"; };
 		004402092153055300C420CE /* PlayerContainerController+Transition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlayerContainerController+Transition.swift"; sourceTree = "<group>"; };
 		004427B0215BB36D008D788E /* PlayerLoadingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerLoadingViewController.swift; sourceTree = "<group>"; };
+		004427B3215BE308008D788E /* SpinnerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpinnerViewController.swift; sourceTree = "<group>"; };
 		0058E353213D645900BE28DD /* ZoomAnimatable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomAnimatable.swift; sourceTree = "<group>"; };
 		0058E355213D9AE900BE28DD /* UIViewControllerContextTransitioning+Util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewControllerContextTransitioning+Util.swift"; sourceTree = "<group>"; };
 		005E2AA220273C5800F731FA /* CollectionViewGridLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionViewGridLayout.swift; sourceTree = "<group>"; };
@@ -394,6 +397,7 @@
 			children = (
 				00328A961FC85D84004648F9 /* PlayerContainerController.swift */,
 				004402092153055300C420CE /* PlayerContainerController+Transition.swift */,
+				004427B3215BE308008D788E /* SpinnerViewController.swift */,
 				004402012152B10B00C420CE /* Loading */,
 				004401F72152A72C00C420CE /* Player */,
 				00D43AF52151938F0065A139 /* Selected Frames */,
@@ -618,6 +622,7 @@
 				00730EAF214FEA5A001A6EA7 /* CGSize.swift in Sources */,
 				00730EB1214FEA5A001A6EA7 /* Settings.swift in Sources */,
 				00730EB2214FEA5A001A6EA7 /* SettingsViewController.swift in Sources */,
+				004427B5215BE317008D788E /* SpinnerViewController.swift in Sources */,
 				00730EB3214FEA5A001A6EA7 /* BlurredImageView.swift in Sources */,
 				00730EB4214FEA5A001A6EA7 /* PlayerSeeker.swift in Sources */,
 				00730EB5214FEA5A001A6EA7 /* Alerts.swift in Sources */,
@@ -729,6 +734,7 @@
 				006F8F7E202DD5A100CD93DB /* RepeatingButton.swift in Sources */,
 				00D43AF121516A150065A139 /* FrameCell.swift in Sources */,
 				00C098D51FC1A7C2000B05FE /* PHPhotoLibrary+Authorization.swift in Sources */,
+				004427B4215BE308008D788E /* SpinnerViewController.swift in Sources */,
 				00EA2C6A2142B20E002E1266 /* MappedFetchResult+Change.swift in Sources */,
 				0015537F2129C8CF00F58CEE /* Album.swift in Sources */,
 				0072089B1FBF87B20046F389 /* AlbumCollectionViewDataSource.swift in Sources */,

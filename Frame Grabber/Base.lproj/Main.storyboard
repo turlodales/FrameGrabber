@@ -820,6 +820,46 @@
             </objects>
             <point key="canvasLocation" x="1272.8" y="1853.9408866995075"/>
         </scene>
+        <!--Spinner View Controller-->
+        <scene sceneID="lEd-rp-Pet">
+            <objects>
+                <viewController storyboardIdentifier="SpinnerViewController" id="NtW-Sd-h1f" customClass="SpinnerViewController" customModule="Frame_Grabber" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="xbl-6t-QA1">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="jdU-Zd-RDc">
+                                <rect key="frame" x="149" y="367.66666666666669" width="77" height="77"/>
+                                <subviews>
+                                    <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="XGd-OO-fkg">
+                                        <rect key="frame" x="20" y="20" width="37" height="37"/>
+                                    </activityIndicatorView>
+                                </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstItem="XGd-OO-fkg" firstAttribute="top" secondItem="jdU-Zd-RDc" secondAttribute="top" constant="20" id="VAa-rk-vpo"/>
+                                    <constraint firstAttribute="trailing" secondItem="XGd-OO-fkg" secondAttribute="trailing" constant="20" id="gfK-8T-D9S"/>
+                                    <constraint firstAttribute="bottom" secondItem="XGd-OO-fkg" secondAttribute="bottom" constant="20" id="nn0-ZT-jgh"/>
+                                    <constraint firstItem="XGd-OO-fkg" firstAttribute="leading" secondItem="jdU-Zd-RDc" secondAttribute="leading" constant="20" id="var-pl-yrt"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="12"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                            </view>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="jdU-Zd-RDc" firstAttribute="centerY" secondItem="xbl-6t-QA1" secondAttribute="centerY" id="4Cf-2L-aEz"/>
+                            <constraint firstItem="jdU-Zd-RDc" firstAttribute="centerX" secondItem="xbl-6t-QA1" secondAttribute="centerX" id="OYl-du-Anf"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="jbi-dg-69v"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="BAj-Nu-X37" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1252" y="-1037"/>
+        </scene>
         <!--Frame Thumbnails View Controller-->
         <scene sceneID="seR-3R-CNW">
             <objects>

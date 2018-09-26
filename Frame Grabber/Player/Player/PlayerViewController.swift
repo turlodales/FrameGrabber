@@ -105,7 +105,11 @@ private extension PlayerViewController {
     }
 
     func generateFramesAndShare(for times: [CMTime]) {
+        present(SpinnerViewController.instantiateFromStoryboard(), animated: false)
+
         thumbnailsViewController.generateFullSizeFrames(for: times) { [weak self] result in
+            self?.dismiss(animated: false)
+
             guard let self = self else { return }
 
             switch result {
