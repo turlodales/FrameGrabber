@@ -5,6 +5,7 @@ import AVKit
 class PlayerContainerController: UIViewController {
 
     var videoManager: VideoManager!
+    lazy var metadataOptionProvider: UserDefaults = .standard
 
     private(set) var playerViewController: PlayerViewController!
     private(set) var overlayViewController: PlayerOverlaysController!
@@ -60,7 +61,6 @@ class PlayerContainerController: UIViewController {
             playerViewController = controller
 
         case let controller as PlayerOverlaysController:
-            controller.videoManager = videoManager
             controller.delegate = self
             overlayViewController = controller
 
@@ -77,11 +77,11 @@ class PlayerContainerController: UIViewController {
 
 extension PlayerContainerController: PlayerViewControllerDelegate {
 
-    func controller(_ controller: PlayerViewController, loadingPlayerItemDidFinish item: AVPlayerItem, playbackController: PlaybackController) {
+    func controller(_ controller: PlayerViewController, loadingVideoDidFinish video: Video, playbackController: PlaybackController) {
         overlayViewController.playbackController = playbackController
     }
 
-    func controllerLoadingPlayerItemDidFail(_ controller: PlayerViewController) {
+    func controllerLoadingVideoDidFail(_ controller: PlayerViewController) {
         presentAlert(.videoLoadingFailed() { _ in self.done() })
     }
 
@@ -102,8 +102,14 @@ extension PlayerContainerController: PlayerOverlaysControllerDelegate {
         presentAlert(.imageGenerationFailed())
     }
 
-    func controller(_ controller: PlayerOverlaysController, didSelectShareFrames items: [Any]) {
-        let shareController = UIActivityViewController(activityItems: items, applicationActivities: nil)
+    func controller(_ controller: PlayerOverlaysController, didSelectShareFrames frames: [Frame]) {
+        let includeMetadata = metadataOptionProvider.includeMetadata
+
+        let images = frames
+            .map { $0.image }
+            .map { $0.jpegData(includingMetadata: includeMetadata) ?? ($0.image as Any) }
+
+        let shareController = UIActivityViewController(activityItems: images, applicationActivities: nil)
         present(shareController, animated: true)
     }
 }

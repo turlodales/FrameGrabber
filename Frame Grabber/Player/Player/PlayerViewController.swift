@@ -2,8 +2,8 @@ import UIKit
 import AVKit
 
 protocol PlayerViewControllerDelegate: class {
-    func controller(_ controller: PlayerViewController, loadingPlayerItemDidFinish item: AVPlayerItem, playbackController: PlaybackController)
-    func controllerLoadingPlayerItemDidFail(_ controller: PlayerViewController)
+    func controller(_ controller: PlayerViewController, loadingVideoDidFinish video: Video, playbackController: PlaybackController)
+    func controllerLoadingVideoDidFail(_ controller: PlayerViewController)
     func controllerPlaybackDidFail(_ controller: PlayerViewController)
 }
 
@@ -50,7 +50,7 @@ private extension PlayerViewController {
         let size = loadingView.imageView.bounds.size.scaledToScreen
         let config = ImageConfig(size: size, mode: .aspectFit, options: .default())
 
-        videoManager?.posterImage(with: config) { [weak self] image, _ in
+        videoManager?.loadPosterImage(with: config) { [weak self] image, _ in
             guard let image = image else { return }
 
             // Use same image for background ignoring different size/content mode as it's
@@ -61,30 +61,30 @@ private extension PlayerViewController {
     }
 
     func loadVideo() {
-        videoManager?.downloadingPlayerItem(progressHandler: { [weak self] progress in
+        videoManager?.loadVideo(progressHandler: { [weak self] progress in
             self?.loadingView.showProgress(Float(progress), animated: true)
 
-        }, resultHandler: { [weak self] playerItem, info in
+        }, resultHandler: { [weak self] video, info in
             self?.loadingView.showProgress(nil, animated: true)
 
             if !info.isCancelled {
-                self?.configurePlayback(with: playerItem)
+                self?.configurePlayback(with: video)
             }
         })
     }
 
-    func configurePlayback(with playerItem: AVPlayerItem?) {
-        guard let item = playerItem else {
-            delegate?.controllerLoadingPlayerItemDidFail(self)
+    func configurePlayback(with video: Video?) {
+        guard let video = video else {
+            delegate?.controllerLoadingVideoDidFail(self)
             return
         }
 
-        playbackController = PlaybackController(playerItem: item)
+        playbackController = PlaybackController(video: video)
         playbackController?.observers.add(self)
-        playbackController?.play()
         playerView.player = playbackController?.player
+        playbackController?.play()
 
-        delegate?.controller(self, loadingPlayerItemDidFinish: item, playbackController: playbackController!)
+        delegate?.controller(self, loadingVideoDidFinish: video, playbackController: playbackController!)
     }
 
     func updateReadyForInitialPlayback() {
@@ -149,18 +149,23 @@ extension PlayerViewController: ZoomAnimatable {
         guard let playerView = playerView else { return nil }
 
         // If ready animate from video position (possibly zoomed, scrolled), otherwise
-        // from preview image (centered, aspect fitted).
-        let videoFrame = playerView.zoomedVideoFrame
-        let sourceFrame = (videoFrame != .zero) ? videoFrame : loadingImageFrame
+        // from preview image (centered, aspect fitted). Or fall back to cross-dissolve.
+        guard let sourceFrame = playerView.zoomedVideoFrame.nonZeroSize ?? loadingImageFrame.nonZeroSize else {
+            return nil
+        }
 
         return view.convert(sourceFrame, to: view)
     }
 
     /// The aspect fitted size the preview image occupies in the image view.
     private var loadingImageFrame: CGRect {
-        let aspectRatio = loadingView.imageView.image?.size
-            ?? videoManager?.pixelSize
-            ?? .zero
-        return AVMakeRect(aspectRatio: aspectRatio, insideRect: loadingView.imageView.frame)
+        guard let image = loadingView.imageView.image else { return .zero }
+        return AVMakeRect(aspectRatio: image.size, insideRect: loadingView.imageView.frame)
+    }
+}
+
+private extension CGRect {
+    var nonZeroSize: CGRect? {
+        return (size == .zero) ? nil : self
     }
 }

@@ -1,23 +1,37 @@
 import UIKit
+import CoreMedia
 
 protocol FrameThumbnailsViewControllerDelegate: class {
+    func controllerThumbnailsChanged(_ controller: FrameThumbnailsViewController)
     func controllerSelectionChanged(_ controller: FrameThumbnailsViewController)
-    func controllerFramesChanged(_ controller: FrameThumbnailsViewController)
 }
 
 class FrameThumbnailsViewController: UICollectionViewController {
 
     weak var delegate: FrameThumbnailsViewControllerDelegate?
 
-    private(set) var frames = [Frame]() {
-        didSet { delegate?.controllerFramesChanged(self) }
+    var video: Video? {
+        didSet {
+            dataSource = video.flatMap { FramesDataSource(video: $0) }
+            dataSource?.thumbnailSize = thumbnailSize
+        }
+    }
+
+    var thumbnails: [Frame] {
+        return dataSource?.thumbnails ?? []
     }
 
     var selectedFrame: Frame? {
-        return collectionView.indexPathsForSelectedItems?.first.flatMap { frames[$0.item] }
+        let index = collectionView.indexPathsForSelectedItems?.first?.item
+        return index.flatMap { dataSource?.thumbnails[$0] }
     }
 
+    private var dataSource: FramesDataSource?
     private let cellId = String(describing: FrameCell.self)
+
+    private var thumbnailSize: CGSize {
+        return (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.itemSize ?? .zero
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,25 +42,35 @@ class FrameThumbnailsViewController: UICollectionViewController {
         collectionView.collectionViewLayout = FrameThumbnailsCollectionViewLayout()
     }
 
-    // MARK: - Managing Frames
+    // MARK: - Frames
 
-     /// Frames are inserted in sorted order by time.
-    func insertFrame(_ frame: Frame) {
-        let index = frames.firstIndex { frame.time < $0.time } ?? frames.count
-        frames.insert(frame, at: index)
-
-        let indexPath = IndexPath(item: index, section: 0)
-        collectionView.insertItems(at: [indexPath])
-        collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
+    /// Frames are inserted in sorted order by time.
+    func addThumbnail(for time: CMTime) {
+        dataSource?.addThumbnail(for: time) { [weak self] index, result in
+            guard let self = self, let index = index else { return }
+            let indexPath = IndexPath(item: index, section: 0)
+            self.collectionView.insertItems(at: [indexPath])
+            self.collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
+            self.delegate?.controllerThumbnailsChanged(self)
+        }
     }
 
-    @IBAction func removeFrame(_ sender: UIButton) {
+    func removeThumbnail(at index: Int) {
+        clearSelection()
+        dataSource?.removeThumbnail(at: index)
+        collectionView.deleteItems(at: [IndexPath(item: index, section: 0)])
+        delegate?.controllerThumbnailsChanged(self)
+    }
+
+    @IBAction private func removeThumbnail(_ sender: UIButton) {
         guard let cell = sender.firstSuperview(of: UICollectionViewCell.self),
             let indexPath = collectionView.indexPath(for: cell) else { return }
 
-        clearSelection()
-        frames.remove(at: indexPath.item)
-        collectionView.deleteItems(at: [indexPath])
+        removeThumbnail(at: indexPath.item)
+    }
+
+    func generateFullSizeFrames(for times: [CMTime], completionHandler: @escaping (FramesResult) -> ()) {
+        dataSource?.generateFullSizeFrames(for: times, completionHandler: completionHandler)
     }
 
     func clearSelection() {
@@ -65,14 +89,13 @@ class FrameThumbnailsViewController: UICollectionViewController {
     }
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return frames.count
+        return dataSource?.thumbnails.count ?? 0
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as? FrameCell else { fatalError("Wrong cell id or type.") }
 
-        let frame = frames[indexPath.item]
-        cell.imageView.image = frame.image
+        cell.imageView.image = dataSource?.thumbnails[indexPath.item].image.image
 
         return cell
     }

@@ -1,7 +1,7 @@
-import UIKit
-import AVKit
+import CoreMedia
 
 struct Frame {
-    let time: CMTime
-    let image: UIImage
+    let image: MetadataImage
+    let requestedTime: CMTime
+    let actualTime: CMTime
 }

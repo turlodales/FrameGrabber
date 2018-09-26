@@ -925,7 +925,7 @@
                                             <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             <state key="normal" image="close"/>
                                             <connections>
-                                                <action selector="removeFrame:" destination="J6W-j9-5Sk" eventType="touchUpInside" id="7iF-hc-B2t"/>
+                                                <action selector="removeThumbnail:" destination="J6W-j9-5Sk" eventType="touchUpInside" id="7iF-hc-B2t"/>
                                             </connections>
                                         </button>
                                     </subviews>

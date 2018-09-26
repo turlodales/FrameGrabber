@@ -1,16 +1,19 @@
 import AVKit
 
-/// Manages looped playback for a single player item.
+/// Manages looped playback for a single video.
 class PlaybackController {
 
+    let video: Video
     let player: AVPlayer
     let seeker: PlayerSeeker
+
     private(set) lazy var observers = PlayerObservations(player: self.player)
     private let looper: AVPlayerLooper
 
-    init(playerItem: AVPlayerItem, player: AVQueuePlayer = .init()) {
+    init(video: Video, player: AVQueuePlayer = .init()) {
+        self.video = video
         self.player = player
-        self.looper = AVPlayerLooper(player: player, templateItem: playerItem)
+        self.looper = AVPlayerLooper(player: player, templateItem: AVPlayerItem(asset: video.avAsset))
         self.seeker = PlayerSeeker(player: player)
     }
 
@@ -37,10 +40,6 @@ class PlaybackController {
 
     var currentItem: AVPlayerItem? {
         return player.currentItem
-    }
-
-    var frameRate: Float? {
-        return currentItem?.asset.tracks(withMediaType: .video).first?.nominalFrameRate
     }
 
     // MARK: Playback

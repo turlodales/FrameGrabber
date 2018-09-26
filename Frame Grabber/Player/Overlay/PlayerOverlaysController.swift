@@ -3,7 +3,7 @@ import AVKit
 
 protocol PlayerOverlaysControllerDelegate: class {
     func controllerDidSelectDone(_ controller: PlayerOverlaysController)
-    func controller(_ controller: PlayerOverlaysController, didSelectShareFrames frames: [Any])
+    func controller(_ controller: PlayerOverlaysController, didSelectShareFrames frames: [Frame])
     func controllerGeneratingFrameDidFail(_ controller: PlayerOverlaysController)
 }
 
@@ -11,11 +11,12 @@ protocol PlayerOverlaysControllerDelegate: class {
 class PlayerOverlaysController: UIViewController {
 
     weak var delegate: PlayerOverlaysControllerDelegate?
-    var settings = UserDefaults.standard
-    var videoManager: VideoManager!
 
     var playbackController: PlaybackController? {
-        didSet { playbackController?.observers.add(self) }
+        didSet {
+            playbackController?.observers.add(self)
+            selectedFramesViewController.video = playbackController?.video
+        }
     }
 
     private var selectedFramesViewController: FrameThumbnailsViewController!
@@ -32,8 +33,8 @@ class PlayerOverlaysController: UIViewController {
         return playbackController?.isSeeking ?? false
     }
 
-    private var hasSelection: Bool {
-        return !selectedFramesViewController.frames.isEmpty
+    private var selectedFrames: [Frame] {
+        return selectedFramesViewController.thumbnails
     }
 
     override func viewDidLoad() {
@@ -80,19 +81,30 @@ private extension PlayerOverlaysController {
     }
 
     @IBAction func addCurrentFrame() {
-        generateCurrentFrame {
-            selectedFramesViewController.insertFrame($0)
-        }
+        guard let time = playbackController?.currentTime else { return }
+        selectedFramesViewController.addThumbnail(for: time)
     }
 
     @IBAction func shareFrames() {
-        playbackController?.pause()
+        guard let playbackController = playbackController else { return }
 
-        if hasSelection {
-            shareFrames(selectedFramesViewController.frames)
-        } else {
-            generateCurrentFrame {
-                shareFrames([$0])
+        playbackController.pause()
+
+        let times = selectedFrames.isEmpty ? [playbackController.currentTime] : selectedFrames.map { $0.actualTime }
+        generateFramesAndShare(for: times)
+    }
+
+    func generateFramesAndShare(for times: [CMTime]) {
+        selectedFramesViewController.generateFullSizeFrames(for: times) { [weak self] result in
+            guard let self = self else { return }
+
+            switch result {
+            case .cancelled:
+                break
+            case .failed:
+                self.delegate?.controllerGeneratingFrameDidFail(self)
+            case .succeeded(let frames):
+                self.delegate?.controller(self, didSelectShareFrames: frames)
             }
         }
     }
@@ -101,36 +113,7 @@ private extension PlayerOverlaysController {
         guard !isScrubbing else { return }
 
         playbackController?.pause()
-        playbackController?.seeker.smoothlySeek(to: frame.time)
-    }
-}
-
-// MARK: Image Generation & Sharing
-
-private extension PlayerOverlaysController {
-
-    func generateCurrentFrame(successHandler: (Frame) -> ()) {
-        guard let frame = playbackController?.currentItem.flatMap(videoManager.currentFrame) else {
-            delegate?.controllerGeneratingFrameDidFail(self)
-            return
-        }
-
-        successHandler(frame)
-    }
-
-    func shareFrames(_ frames: [Frame]) {
-        if settings.includeMetadata {
-            delegate?.controller(self, didSelectShareFrames: imagesByAddingMetadata(to: frames))
-        } else {
-            delegate?.controller(self, didSelectShareFrames: frames.map { $0.image })
-        }
-    }
-
-    /// If metadata generation fails returns the plain image.
-    func imagesByAddingMetadata(to frames: [Frame]) -> [Any] {
-        return frames.map {
-            videoManager.jpegData(byAddingAssetMetadataTo: $0.image, compressionQuality: 1) ?? ($0.image as Any)
-        }
+        playbackController?.seeker.smoothlySeek(to: frame.actualTime)
     }
 }
 
@@ -146,7 +129,7 @@ extension PlayerOverlaysController: FrameThumbnailsViewControllerDelegate {
         updateFrameSelection()
     }
 
-    func controllerFramesChanged(_ controller: FrameThumbnailsViewController) {
+    func controllerThumbnailsChanged(_ controller: FrameThumbnailsViewController) {
         updateFrameSelection()
     }
 }
@@ -173,6 +156,10 @@ extension PlayerOverlaysController: PlayerObserver {
 
     func currentPlayerItem(_ playerItem: AVPlayerItem, didUpdateDuration duration: CMTime) {
         controlsView.timeSlider.duration = duration
+    }
+
+    func currentPlayerItem(_ playerItem: AVPlayerItem, didUpdatePresentationSize size: CGSize) {
+        updateSubtitles()
     }
 
     func currentPlayerItem(_ playerItem: AVPlayerItem, didUpdateTracks tracks: [AVPlayerItemTrack]) {
@@ -220,26 +207,24 @@ private extension PlayerOverlaysController {
         updateControlsEnabled()
         updateTitle()
         updateSubtitles()
-        selectedFramesViewController.setHidden(!hasSelection, animated: false)
+        selectedFramesViewController.setHidden(selectedFrames.isEmpty, animated: false)
     }
 
     func updateTitle() {
-        let selectedFrames = selectedFramesViewController?.frames.count ?? 0
         let format = NSLocalizedString("player.selectedFramesPlural", comment: "")
-        titleView.titleLabel.text = String.localizedStringWithFormat(format, selectedFrames)
+        titleView.titleLabel.text = String.localizedStringWithFormat(format, selectedFramesViewController.thumbnails.count)
     }
 
     func updateSubtitles() {
-        guard
-            !hasSelection,
-            let dimensions = videoManager?.pixelSize,
-            let frameRate = playbackController?.frameRate
+        guard selectedFrames.isEmpty,
+            let size = playbackController?.video.pixelSize,
+            let frameRate = playbackController?.video.frameRate
         else {
             titleView.subtitleStack.setHidden(true, animated: false)
             return
         }
 
-        titleView.dimensionsLabel.text = NumberFormatter().string(fromPixelWidth: Int(dimensions.width), height: Int(dimensions.height))
+        titleView.dimensionsLabel.text = NumberFormatter().string(fromPixelWidth: Int(size.width), height: Int(size.height))
         titleView.frameRateLabel.text = NumberFormatter.frameRateFormatter().string(from: frameRate)
         titleView.subtitleStack.setHidden(false, animated: true)
     }
