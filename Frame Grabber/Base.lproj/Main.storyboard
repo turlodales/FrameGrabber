@@ -148,24 +148,26 @@
         <scene sceneID="tlR-Zk-LyG">
             <objects>
                 <viewController id="1Cw-ag-d47" customClass="PlayerContainerController" customModule="Frame_Grabber" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="mzG-VC-6dc">
+                    <view key="view" contentMode="scaleToFill" id="mzG-VC-6dc" customClass="BlurredImageView" customModule="Frame_Grabber" customModuleProvider="target">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="VsW-Q6-HNu" userLabel="Player View Controller">
+                            <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="VsW-Q6-HNu" userLabel="Loading View Controller">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <connections>
-                                    <segue destination="Azh-x1-I5B" kind="embed" id="oAP-nR-Oju"/>
+                                    <segue destination="7Eo-7Z-bdd" kind="embed" id="aAY-2C-Mp6"/>
                                 </connections>
                             </containerView>
-                            <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="SNi-xP-kzJ" userLabel="Overlay View Controller (PassThroughView)" customClass="PassThroughView" customModule="Frame_Grabber" customModuleProvider="target">
+                            <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="SNi-xP-kzJ" userLabel="Player View Controller (PassThroughView)">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <connections>
                                     <segue destination="4ds-1Q-aDu" kind="embed" id="LKU-NP-gQ0"/>
                                 </connections>
                             </containerView>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <gestureRecognizers/>
                         <constraints>
                             <constraint firstItem="SNi-xP-kzJ" firstAttribute="trailing" secondItem="VsW-Q6-HNu" secondAttribute="trailing" id="5hs-Wu-P42"/>
@@ -179,13 +181,10 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="J1y-Hs-CrT"/>
                     </view>
-                    <connections>
-                        <outlet property="view" destination="mzG-VC-6dc" id="9z2-of-GuI"/>
-                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="buo-a7-9ZG" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="486" y="1184"/>
+            <point key="canvasLocation" x="462" y="1537"/>
         </scene>
         <!--Albums-->
         <scene sceneID="0Bf-om-HXi">
@@ -601,96 +600,16 @@
             <point key="canvasLocation" x="506" y="-343"/>
         </scene>
         <!--Player View Controller-->
-        <scene sceneID="BBX-n0-SkE">
-            <objects>
-                <viewController id="Azh-x1-I5B" customClass="PlayerViewController" customModule="Frame_Grabber" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="x5n-SA-Dtl">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="05q-za-ahp" customClass="BlurredImageView" customModule="Frame_Grabber" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
-                            </view>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wTT-DI-66c" customClass="PlayerLoadingView" customModule="Frame_Grabber" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
-                                <subviews>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="eOl-GR-JSf">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
-                                    </imageView>
-                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="feV-na-v5r">
-                                        <rect key="frame" x="39.666666666666657" y="386.33333333333331" width="296" height="39.333333333333314"/>
-                                        <subviews>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Downloading from iCloud…" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DgU-qR-6UL">
-                                                <rect key="frame" x="0.0" y="0.0" width="296" height="19.333333333333332"/>
-                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
-                                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                            <progressView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" verticalHuggingPriority="750" horizontalCompressionResistancePriority="749" translatesAutoresizingMaskIntoConstraints="NO" id="DYz-FR-aMs">
-                                                <rect key="frame" x="0.0" y="31.333333333333371" width="296" height="8"/>
-                                                <constraints>
-                                                    <constraint firstAttribute="height" constant="8" id="tFx-HM-Mcq"/>
-                                                </constraints>
-                                                <color key="trackTintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                            </progressView>
-                                        </subviews>
-                                        <constraints>
-                                            <constraint firstItem="DgU-qR-6UL" firstAttribute="width" secondItem="DYz-FR-aMs" secondAttribute="width" id="XZV-ml-KdQ"/>
-                                        </constraints>
-                                    </stackView>
-                                </subviews>
-                                <constraints>
-                                    <constraint firstItem="eOl-GR-JSf" firstAttribute="top" secondItem="wTT-DI-66c" secondAttribute="top" id="6Bx-qm-ott"/>
-                                    <constraint firstItem="feV-na-v5r" firstAttribute="centerX" secondItem="wTT-DI-66c" secondAttribute="centerX" id="8zC-Jk-EaK"/>
-                                    <constraint firstAttribute="bottom" secondItem="eOl-GR-JSf" secondAttribute="bottom" id="Rd7-99-jOy"/>
-                                    <constraint firstItem="eOl-GR-JSf" firstAttribute="leading" secondItem="wTT-DI-66c" secondAttribute="leading" id="Vka-Pa-jcc"/>
-                                    <constraint firstItem="eOl-GR-JSf" firstAttribute="trailing" secondItem="wTT-DI-66c" secondAttribute="trailing" id="mLa-xw-0Yg"/>
-                                    <constraint firstItem="feV-na-v5r" firstAttribute="centerY" secondItem="wTT-DI-66c" secondAttribute="centerY" id="pCf-aS-URS"/>
-                                </constraints>
-                                <connections>
-                                    <outlet property="imageView" destination="eOl-GR-JSf" id="dZj-wL-VOd"/>
-                                    <outlet property="progressView" destination="DYz-FR-aMs" id="tQv-2F-jh9"/>
-                                    <outlet property="titleLabel" destination="DgU-qR-6UL" id="cfP-CQ-Clx"/>
-                                </connections>
-                            </view>
-                            <view opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="8St-aq-4oR" customClass="ZoomingPlayerView" customModule="Frame_Grabber" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
-                            </view>
-                        </subviews>
-                        <constraints>
-                            <constraint firstItem="wTT-DI-66c" firstAttribute="trailing" secondItem="x5n-SA-Dtl" secondAttribute="trailing" id="6fl-ol-gCk"/>
-                            <constraint firstItem="8St-aq-4oR" firstAttribute="leading" secondItem="x5n-SA-Dtl" secondAttribute="leading" id="96j-Cd-pRd"/>
-                            <constraint firstItem="8St-aq-4oR" firstAttribute="trailing" secondItem="x5n-SA-Dtl" secondAttribute="trailing" id="9Cz-bh-Agf"/>
-                            <constraint firstItem="05q-za-ahp" firstAttribute="trailing" secondItem="x5n-SA-Dtl" secondAttribute="trailing" id="Mmh-hW-3sQ"/>
-                            <constraint firstAttribute="bottom" secondItem="wTT-DI-66c" secondAttribute="bottom" id="Qq2-x5-As5"/>
-                            <constraint firstAttribute="bottom" secondItem="8St-aq-4oR" secondAttribute="bottom" id="Wqd-FK-Hbm"/>
-                            <constraint firstItem="wTT-DI-66c" firstAttribute="leading" secondItem="x5n-SA-Dtl" secondAttribute="leading" id="XFG-Cy-afe"/>
-                            <constraint firstItem="wTT-DI-66c" firstAttribute="top" secondItem="x5n-SA-Dtl" secondAttribute="top" id="Xwn-FX-xNI"/>
-                            <constraint firstItem="8St-aq-4oR" firstAttribute="top" secondItem="x5n-SA-Dtl" secondAttribute="top" id="col-T6-2pJ"/>
-                            <constraint firstAttribute="bottom" secondItem="05q-za-ahp" secondAttribute="bottom" id="ehe-6y-Dff"/>
-                            <constraint firstItem="05q-za-ahp" firstAttribute="top" secondItem="x5n-SA-Dtl" secondAttribute="top" id="hyS-X3-f2Y"/>
-                            <constraint firstItem="05q-za-ahp" firstAttribute="leading" secondItem="x5n-SA-Dtl" secondAttribute="leading" id="yAj-XP-Rlz"/>
-                        </constraints>
-                        <viewLayoutGuide key="safeArea" id="NcG-SV-XS5"/>
-                    </view>
-                    <connections>
-                        <outlet property="backgroundView" destination="05q-za-ahp" id="MQ0-ka-WM0"/>
-                        <outlet property="loadingView" destination="wTT-DI-66c" id="ekZ-Wn-BlN"/>
-                        <outlet property="playerView" destination="8St-aq-4oR" id="vUX-s8-24B"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="3mp-C1-xuh" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1255" y="1183"/>
-        </scene>
-        <!--Player Overlays Controller-->
         <scene sceneID="lvg-GR-3Mr">
             <objects>
-                <viewController id="4ds-1Q-aDu" customClass="PlayerOverlaysController" customModule="Frame_Grabber" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" opaque="NO" contentMode="scaleToFill" id="gnO-gX-JYa" customClass="PassThroughView" customModule="Frame_Grabber" customModuleProvider="target">
+                <viewController id="4ds-1Q-aDu" customClass="PlayerViewController" customModule="Frame_Grabber" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" opaque="NO" contentMode="scaleToFill" id="gnO-gX-JYa">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vG3-dd-C6h" customClass="ZoomingPlayerView" customModule="Frame_Grabber" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                            </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gds-To-V0F" customClass="PlayerTitleView" customModule="Frame_Grabber" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="144.33333333333334"/>
                                 <subviews>
@@ -755,7 +674,8 @@
                                 <connections>
                                     <outlet property="dimensionsLabel" destination="yOu-yh-dBK" id="2uU-Fz-YlC"/>
                                     <outlet property="frameRateLabel" destination="o9i-W1-6mk" id="tl5-o4-NEJ"/>
-                                    <outlet property="subtitleStack" destination="Y8q-9U-nlJ" id="IUQ-p0-qAt"/>
+                                    <outlet property="subtitleContainer" destination="Y8q-9U-nlJ" id="xpP-x9-kKI"/>
+                                    <outlet property="thumbnailsContainer" destination="Uog-p6-HIS" id="lli-h5-tL8"/>
                                     <outlet property="titleLabel" destination="txw-AT-8tT" id="UkP-BP-fhL"/>
                                 </connections>
                             </view>
@@ -878,22 +798,27 @@
                         </subviews>
                         <constraints>
                             <constraint firstAttribute="bottom" secondItem="R5C-4S-d6Z" secondAttribute="bottom" id="0Oz-HX-XQZ"/>
+                            <constraint firstAttribute="bottom" secondItem="vG3-dd-C6h" secondAttribute="bottom" id="2kQ-mx-ZgD"/>
                             <constraint firstItem="gds-To-V0F" firstAttribute="top" secondItem="gnO-gX-JYa" secondAttribute="top" id="2nt-yu-f22"/>
                             <constraint firstAttribute="trailing" secondItem="gds-To-V0F" secondAttribute="trailing" id="7ha-pF-D3r"/>
                             <constraint firstItem="R5C-4S-d6Z" firstAttribute="leading" secondItem="gnO-gX-JYa" secondAttribute="leading" id="9fB-YI-2mT"/>
+                            <constraint firstItem="vG3-dd-C6h" firstAttribute="top" secondItem="gnO-gX-JYa" secondAttribute="top" id="9ut-5y-dfA"/>
                             <constraint firstItem="gds-To-V0F" firstAttribute="leading" secondItem="gnO-gX-JYa" secondAttribute="leading" id="Qus-or-ZxJ"/>
+                            <constraint firstItem="vG3-dd-C6h" firstAttribute="trailing" secondItem="8h9-gh-294" secondAttribute="trailing" id="XvI-Ab-fjo"/>
                             <constraint firstAttribute="trailing" secondItem="R5C-4S-d6Z" secondAttribute="trailing" id="bp5-uZ-Ew8"/>
+                            <constraint firstItem="vG3-dd-C6h" firstAttribute="leading" secondItem="8h9-gh-294" secondAttribute="leading" id="vaF-WK-LtN"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="8h9-gh-294"/>
                     </view>
                     <connections>
                         <outlet property="controlsView" destination="R5C-4S-d6Z" id="Pm4-xb-Ea6"/>
+                        <outlet property="playerView" destination="vG3-dd-C6h" id="s75-JM-Ulh"/>
                         <outlet property="titleView" destination="gds-To-V0F" id="sTd-88-IUp"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="aMV-Oq-5q0" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2023" y="1184"/>
+            <point key="canvasLocation" x="1272.8" y="1853.9408866995075"/>
         </scene>
         <!--Frame Thumbnails View Controller-->
         <scene sceneID="seR-3R-CNW">
@@ -954,7 +879,74 @@
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="nI2-KV-Z1c" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2732" y="954"/>
+            <point key="canvasLocation" x="2001" y="1639"/>
+        </scene>
+        <!--Player Loading View Controller-->
+        <scene sceneID="Zdd-C4-gZo">
+            <objects>
+                <viewController id="7Eo-7Z-bdd" customClass="PlayerLoadingViewController" customModule="Frame_Grabber" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="l6j-Nf-nu6" customClass="PassThroughView" customModule="Frame_Grabber" customModuleProvider="target">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="aan-zo-Aae" customClass="PlayerLoadingView" customModule="Frame_Grabber" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                                <subviews>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="QwE-b3-uYG">
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                                    </imageView>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="r05-Ol-zMv">
+                                        <rect key="frame" x="39.666666666666657" y="386.33333333333331" width="296" height="39.333333333333314"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Downloading from iCloud…" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jXB-tf-I7n">
+                                                <rect key="frame" x="0.0" y="0.0" width="296" height="19.333333333333332"/>
+                                                <fontDescription key="fontDescription" type="boldSystem" pointSize="16"/>
+                                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <progressView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" verticalHuggingPriority="750" horizontalCompressionResistancePriority="749" translatesAutoresizingMaskIntoConstraints="NO" id="YHm-kL-ANW">
+                                                <rect key="frame" x="0.0" y="31.333333333333371" width="296" height="8"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="8" id="OMd-6T-2ET"/>
+                                                </constraints>
+                                                <color key="trackTintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            </progressView>
+                                        </subviews>
+                                        <constraints>
+                                            <constraint firstItem="jXB-tf-I7n" firstAttribute="width" secondItem="YHm-kL-ANW" secondAttribute="width" id="Fli-TV-HZW"/>
+                                        </constraints>
+                                    </stackView>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="QwE-b3-uYG" firstAttribute="top" secondItem="aan-zo-Aae" secondAttribute="top" id="2r3-Cg-oW0"/>
+                                    <constraint firstItem="r05-Ol-zMv" firstAttribute="centerX" secondItem="aan-zo-Aae" secondAttribute="centerX" id="MlD-d3-W7B"/>
+                                    <constraint firstItem="QwE-b3-uYG" firstAttribute="trailing" secondItem="aan-zo-Aae" secondAttribute="trailing" id="Rbl-Ox-WOG"/>
+                                    <constraint firstAttribute="bottom" secondItem="QwE-b3-uYG" secondAttribute="bottom" id="V0n-CL-Zze"/>
+                                    <constraint firstItem="QwE-b3-uYG" firstAttribute="leading" secondItem="aan-zo-Aae" secondAttribute="leading" id="W91-eM-NTn"/>
+                                    <constraint firstItem="r05-Ol-zMv" firstAttribute="centerY" secondItem="aan-zo-Aae" secondAttribute="centerY" id="rX8-3v-ShF"/>
+                                </constraints>
+                                <connections>
+                                    <outlet property="imageView" destination="QwE-b3-uYG" id="dfU-JC-1Tr"/>
+                                    <outlet property="progressView" destination="YHm-kL-ANW" id="gI4-0x-yey"/>
+                                    <outlet property="titleLabel" destination="jXB-tf-I7n" id="Z2b-EA-T83"/>
+                                </connections>
+                            </view>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="aan-zo-Aae" firstAttribute="leading" secondItem="l6j-Nf-nu6" secondAttribute="leading" id="45A-qC-jFM"/>
+                            <constraint firstItem="aan-zo-Aae" firstAttribute="trailing" secondItem="l6j-Nf-nu6" secondAttribute="trailing" id="FM8-QU-dMU"/>
+                            <constraint firstAttribute="bottom" secondItem="aan-zo-Aae" secondAttribute="bottom" id="N0W-bA-DpW"/>
+                            <constraint firstItem="aan-zo-Aae" firstAttribute="top" secondItem="l6j-Nf-nu6" secondAttribute="top" id="Ymw-Zw-UDZ"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="hsS-cc-kZE"/>
+                    </view>
+                    <connections>
+                        <outlet property="loadingView" destination="aan-zo-Aae" id="LyK-wA-Qyb"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="8Qm-oF-ycW" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1255" y="1183"/>
         </scene>
     </scenes>
     <resources>

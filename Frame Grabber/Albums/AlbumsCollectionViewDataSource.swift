@@ -49,7 +49,7 @@ class AlbumsCollectionViewDataSource: NSObject, UICollectionViewDataSource, UICo
         return sections[indexPath.section].albums[indexPath.item]
     }
 
-    func thumbnail(for album: Album, resultHandler: @escaping (UIImage?, PHImageManager.Info) -> ()) -> ImageRequest? {
+    func thumbnail(for album: Album, resultHandler: @escaping (UIImage?, ImageRequestInfo) -> ()) -> ImageRequest? {
         guard let keyAsset = album.keyAsset else { return nil }
 
         return imageManager.requestImage(for: keyAsset, config: imageConfig, resultHandler: resultHandler)

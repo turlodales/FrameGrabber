@@ -2,97 +2,145 @@ import UIKit
 import AVKit
 
 protocol PlayerViewControllerDelegate: class {
-    func controller(_ controller: PlayerViewController, loadingVideoDidFinish video: Video, playbackController: PlaybackController)
-    func controllerLoadingVideoDidFail(_ controller: PlayerViewController)
+    func controllerIsReadyForInitialPlayback(_ controller: PlayerViewController)
     func controllerPlaybackDidFail(_ controller: PlayerViewController)
+    func controllerDidSelectDone(_ controller: PlayerViewController)
+    func controller(_ controller: PlayerViewController, didSelectShareFrames frames: [Frame])
+    func controllerGeneratingFramesDidFail(_ controller: PlayerViewController)
 }
 
-/// Loads the video and manages background, loading and player view.
+/// Manages the title and player controls view, video playback and generating frames.
 class PlayerViewController: UIViewController {
 
     weak var delegate: PlayerViewControllerDelegate?
-    private(set) var playbackController: PlaybackController?
-    
-    var videoManager: VideoManager? {
-        didSet { loadMedia() }
+
+    var video: Video! {
+        didSet {
+            playbackController = PlaybackController(video: video)
+            playbackController.observers.add(self)
+            playerView.player = playbackController.player
+            thumbnailsViewController.video = video
+            playbackController.play()
+        }
     }
 
-    private var isReadyForInitialPlayback = false {
-        didSet { loadingView.imageView.isHidden = isReadyForInitialPlayback }
-    }
+    private var playbackController: PlaybackController!
+    private(set) var thumbnailsViewController: FrameThumbnailsViewController!
+    private lazy var timeFormatter = VideoTimeFormatter()
+    private var isReadyForInitialPlayback = false
 
-    @IBOutlet var backgroundView: BlurredImageView!
-    @IBOutlet var loadingView: PlayerLoadingView!
     @IBOutlet var playerView: ZoomingPlayerView!
+    @IBOutlet private var titleView: PlayerTitleView!
+    @IBOutlet private var controlsView: PlayerControlsView!
+
+    private var isScrubbing: Bool {
+        return controlsView.timeSlider.isInteracting
+    }
+
+    private var isSeeking: Bool {
+        return playbackController?.isSeeking ?? false
+    }
+
+    private var selectedFrames: [Frame] {
+        return thumbnailsViewController.thumbnails
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         configureViews()
-        loadMedia()
+    }
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let controller = segue.destination as? FrameThumbnailsViewController {
+            thumbnailsViewController = controller
+            thumbnailsViewController.delegate = self
+        }
+    }
+
+    func toggleOverlays(animated: Bool = true) {
+        titleView.toggleHidden(animated: animated)
+        controlsView.toggleHidden(animated: animated)
     }
 }
 
+// MARK: - Actions
+
 private extension PlayerViewController {
 
-    func configureViews() {
-        view.backgroundColor = nil
-        playerView.delegate = self
-        updateReadyForInitialPlayback()
+    @IBAction func done() {
+        playbackController?.pause()
+        delegate?.controllerDidSelectDone(self)
     }
 
-    func loadMedia() {
-        guard isViewLoaded else { return }
-        loadPreviewImage()
-        loadVideo()
+    @IBAction func playOrPause() {
+        guard !isScrubbing else { return }
+
+        playbackController.playOrPause()
+        thumbnailsViewController.clearSelection()
     }
 
-    func loadPreviewImage() {
-        let size = loadingView.imageView.bounds.size.scaledToScreen
-        let config = ImageConfig(size: size, mode: .aspectFit, options: .default())
+    func step(byCount count: Int) {
+        guard !isScrubbing else { return }
 
-        videoManager?.loadPosterImage(with: config) { [weak self] image, _ in
-            guard let image = image else { return }
-
-            // Use same image for background ignoring different size/content mode as it's
-            // blurred anyway.
-            self?.loadingView.imageView.image = image
-            self?.backgroundView.imageView.image = image
-        }
+        playbackController.step(byCount: count)
+        thumbnailsViewController.clearSelection()
     }
 
-    func loadVideo() {
-        videoManager?.loadVideo(progressHandler: { [weak self] progress in
-            self?.loadingView.showProgress(Float(progress), animated: true)
+    @IBAction func scrub(_ sender: TimeSlider) {
+        playbackController.seeker.smoothlySeek(to: sender.time)
+        // When scrubbing, display slider time instead of player time.
+        updateViews(withTime: sender.time)
+        thumbnailsViewController.clearSelection()
+    }
 
-        }, resultHandler: { [weak self] video, info in
-            self?.loadingView.showProgress(nil, animated: true)
+    @IBAction func addCurrentFrame() {
+        thumbnailsViewController.addThumbnail(for: playbackController.currentTime)
+    }
 
-            if !info.isCancelled {
-                self?.configurePlayback(with: video)
+    @IBAction func shareFrames() {
+        playbackController.pause()
+
+        let times = selectedFrames.isEmpty ? [playbackController.currentTime] : selectedFrames.map { $0.actualTime }
+        generateFramesAndShare(for: times)
+    }
+
+    func generateFramesAndShare(for times: [CMTime]) {
+        thumbnailsViewController.generateFullSizeFrames(for: times) { [weak self] result in
+            guard let self = self else { return }
+
+            switch result {
+            case .cancelled:
+                break
+            case .failed:
+                self.delegate?.controllerGeneratingFramesDidFail(self)
+            case .succeeded(let frames):
+                self.delegate?.controller(self, didSelectShareFrames: frames)
             }
-        })
+        }
     }
 
-    func configurePlayback(with video: Video?) {
-        guard let video = video else {
-            delegate?.controllerLoadingVideoDidFail(self)
-            return
+    func showFrame(_ frame: Frame) {
+        guard !isScrubbing else { return }
+
+        playbackController.pause()
+        playbackController.seeker.smoothlySeek(to: frame.actualTime)
+    }
+}
+
+// MARK: - FrameThumbnailsViewControllerDelegate
+
+extension PlayerViewController: FrameThumbnailsViewControllerDelegate {
+
+    func controllerSelectionChanged(_ controller: FrameThumbnailsViewController) {
+        if let frame = thumbnailsViewController.selectedThumbnail {
+            showFrame(frame)
         }
 
-        playbackController = PlaybackController(video: video)
-        playbackController?.observers.add(self)
-        playerView.player = playbackController?.player
-        playbackController?.play()
-
-        delegate?.controller(self, loadingVideoDidFinish: video, playbackController: playbackController!)
+        updateFrameSelection()
     }
 
-    func updateReadyForInitialPlayback() {
-        let isReady = (playbackController?.isReadyToPlay ?? false) && playerView.isReadyForDisplay
-
-        // Player, item and view will reset their readiness on loops. Hide preview image
-        // when all have been initially ready but not on later loops.
-        isReadyForInitialPlayback = isReadyForInitialPlayback || isReady
+    func controllerThumbnailsChanged(_ controller: FrameThumbnailsViewController) {
+        updateFrameSelection()
     }
 }
 
@@ -115,14 +163,111 @@ extension PlayerViewController: PlayerObserver {
         }
 
         updateReadyForInitialPlayback()
+        updateControlsEnabled()
     }
 
     func currentPlayerItem(_ playerItem: AVPlayerItem, didUpdateStatus status: AVPlayerItem.Status) {
         if status == .failed {
             delegate?.controllerPlaybackDidFail(self)
         }
-        
+
         updateReadyForInitialPlayback()
+        updateControlsEnabled()
+    }
+
+    func player(_ player: AVPlayer, didPeriodicUpdateAtTime time: CMTime) {
+        updateViews(withTime: time)
+    }
+
+    func player(_ player: AVPlayer, didUpdateTimeControlStatus status: AVPlayer.TimeControlStatus) {
+        controlsView.playButton.setTimeControlStatus(status)
+    }
+
+    func currentPlayerItem(_ playerItem: AVPlayerItem, didUpdateDuration duration: CMTime) {
+        controlsView.timeSlider.duration = duration
+    }
+
+    func currentPlayerItem(_ playerItem: AVPlayerItem, didUpdatePresentationSize size: CGSize) {
+        updateSubtitles()
+    }
+
+    func currentPlayerItem(_ playerItem: AVPlayerItem, didUpdateTracks tracks: [AVPlayerItemTrack]) {
+        updateSubtitles()
+    }
+}
+
+// MARK: - Private
+
+private extension PlayerViewController {
+
+    func configureViews() {
+        playerView.delegate = self
+        
+        controlsView.previousButton.repeatAction = { [weak self] in
+            self?.step(byCount: -1)
+        }
+
+        controlsView.nextButton.repeatAction = { [weak self] in
+            self?.step(byCount: 1)
+        }
+
+        controlsView.playButton.setTimeControlStatus(.paused)
+        updateViews(withTime: .zero)
+        updateFrameSelection()
+        updateControlsEnabled()
+        updateReadyForInitialPlayback()
+    }
+
+    func updateReadyForInitialPlayback() {
+        guard !isReadyForInitialPlayback,
+            (playbackController?.isReadyToPlay ?? false),
+            playerView.isReadyForDisplay else { return }
+
+        isReadyForInitialPlayback = true
+        delegate?.controllerIsReadyForInitialPlayback(self)
+    }
+
+    func updateControlsEnabled() {
+        let isReady = playbackController?.isReadyToPlay ?? false
+        let canAddFrame = thumbnailsViewController.selectedThumbnail == nil
+        controlsView.setControlsEnabled(isReady)
+        controlsView.addFrameButton.isEnabled = isReady && canAddFrame
+    }
+
+    func updateViews(withTime time: CMTime) {
+        let showMilliseconds = playbackController?.isPlaying == false
+        let formattedTime = timeFormatter.string(fromCurrentTime: time, includeMilliseconds: showMilliseconds)
+        controlsView.timeLabel.text = formattedTime
+
+        if !isScrubbing {
+            controlsView.timeSlider.time = time
+        }
+    }
+
+    func updateFrameSelection() {
+        updateControlsEnabled()
+        updateTitle()
+        updateSubtitles()
+        titleView.thumbnailsContainer.setHidden(selectedFrames.isEmpty, animated: false)
+    }
+
+    func updateTitle() {
+        let format = NSLocalizedString("player.selectedFramesPlural", comment: "")
+        titleView.titleLabel.text = String.localizedStringWithFormat(format, thumbnailsViewController.thumbnails.count)
+    }
+
+    func updateSubtitles() {
+        guard selectedFrames.isEmpty,
+            let size = playbackController?.video.pixelSize,
+            let frameRate = playbackController?.video.frameRate
+        else {
+            titleView.subtitleContainer.setHidden(true, animated: false)
+            return
+        }
+
+        titleView.dimensionsLabel.text = NumberFormatter().string(fromPixelWidth: Int(size.width), height: Int(size.height))
+        titleView.frameRateLabel.text = NumberFormatter.frameRateFormatter().string(from: frameRate)
+        titleView.subtitleContainer.setHidden(false, animated: true)
     }
 }
 
@@ -131,41 +276,23 @@ extension PlayerViewController: PlayerObserver {
 extension PlayerViewController: ZoomAnimatable {
 
     func zoomAnimatorAnimationWillBegin(_ animator: ZoomAnimator) {
-        playerView.isHidden = true
-        loadingView.isHidden = true
+        playerView.setHidden(true, animated: false)
+        titleView.setHidden(true, animated: false)
+        controlsView.setHidden(true, animated: false)
     }
 
     func zoomAnimatorAnimationDidEnd(_ animator: ZoomAnimator) {
-        playerView.isHidden = false
-        loadingView.isHidden = false
-        updateReadyForInitialPlayback()  // Show/hide preview image for current readiness.
+        playerView.setHidden(false, animated: false)
+        titleView.setHidden(false, animated: true)
+        controlsView.setHidden(false, animated: true)
     }
 
     func zoomAnimatorImage(_ animator: ZoomAnimator) -> UIImage? {
-        return loadingView.imageView.image
+        return nil
     }
 
     func zoomAnimator(_ animator: ZoomAnimator, imageFrameInView view: UIView) -> CGRect? {
-        guard let playerView = playerView else { return nil }
-
-        // If ready animate from video position (possibly zoomed, scrolled), otherwise
-        // from preview image (centered, aspect fitted). Or fall back to cross-dissolve.
-        guard let sourceFrame = playerView.zoomedVideoFrame.nonZeroSize ?? loadingImageFrame.nonZeroSize else {
-            return nil
-        }
-
-        return view.convert(sourceFrame, to: view)
-    }
-
-    /// The aspect fitted size the preview image occupies in the image view.
-    private var loadingImageFrame: CGRect {
-        guard let image = loadingView.imageView.image else { return .zero }
-        return AVMakeRect(aspectRatio: image.size, insideRect: loadingView.imageView.frame)
-    }
-}
-
-private extension CGRect {
-    var nonZeroSize: CGRect? {
-        return (size == .zero) ? nil : self
+        let frame = playerView.zoomedVideoFrame
+        return (frame.size != .zero) ? view.convert(frame, to: view) : nil
     }
 }

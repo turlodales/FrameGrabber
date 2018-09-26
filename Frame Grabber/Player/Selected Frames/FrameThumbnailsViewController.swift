@@ -21,7 +21,7 @@ class FrameThumbnailsViewController: UICollectionViewController {
         return dataSource?.thumbnails ?? []
     }
 
-    var selectedFrame: Frame? {
+    var selectedThumbnail: Frame? {
         let index = collectionView.indexPathsForSelectedItems?.first?.item
         return index.flatMap { dataSource?.thumbnails[$0] }
     }

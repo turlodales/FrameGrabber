@@ -5,6 +5,11 @@ class BlurredImageView: UIView {
     let imageView = UIImageView()
     let visualEffectView = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
 
+    var image: UIImage? {
+        get { return imageView.image }
+        set { imageView.image = newValue }
+    }
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         configureViews()
@@ -20,10 +25,10 @@ class BlurredImageView: UIView {
         imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
-        addSubview(imageView)
+        insertSubview(imageView, at: 0)
 
         visualEffectView.frame = bounds
         visualEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        addSubview(visualEffectView)
+        insertSubview(visualEffectView, at: 1)
     }
 }

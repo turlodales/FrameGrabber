@@ -1,6 +1,6 @@
 import UIKit
 
-class PlayerLoadingView: UIView {
+class PlayerLoadingView: PassThroughView {
 
     @IBOutlet var titleLabel: UILabel!
     @IBOutlet var progressView: UIProgressView!

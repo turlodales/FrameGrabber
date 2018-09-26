@@ -49,7 +49,7 @@ class AlbumCollectionViewDataSource: NSObject, UICollectionViewDataSource, UICol
         return album!.fetchResult.object(at: indexPath.item)
     }
 
-    func thumbnail(for video: PHAsset, resultHandler: @escaping (UIImage?, PHImageManager.Info) -> ()) -> ImageRequest {
+    func thumbnail(for video: PHAsset, resultHandler: @escaping (UIImage?, ImageRequestInfo) -> ()) -> ImageRequest {
         return imageManager.requestImage(for: video, config: imageConfig, resultHandler: resultHandler)
     }
 

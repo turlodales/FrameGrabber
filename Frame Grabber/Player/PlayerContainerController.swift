@@ -1,14 +1,18 @@
 import UIKit
 import AVKit
+import Photos
 
-/// Coordinates chrome, presentation and child controllers.
 class PlayerContainerController: UIViewController {
 
-    var videoManager: VideoManager!
+    var videoAsset: PHAsset!
     lazy var metadataOptionProvider: UserDefaults = .standard
 
+    private(set) var loadingViewController: PlayerLoadingViewController!
     private(set) var playerViewController: PlayerViewController!
-    private(set) var overlayViewController: PlayerOverlaysController!
+
+    private var backgroundView: BlurredImageView {
+        return view as! BlurredImageView
+    }
 
     // MARK: Status Bar
 
@@ -55,14 +59,14 @@ class PlayerContainerController: UIViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         switch segue.destination {
 
+        case let controller as PlayerLoadingViewController:
+            controller.videoAsset = videoAsset
+            controller.delegate = self
+            loadingViewController = controller
+
         case let controller as PlayerViewController:
-            controller.videoManager = videoManager
             controller.delegate = self
             playerViewController = controller
-
-        case let controller as PlayerOverlaysController:
-            controller.delegate = self
-            overlayViewController = controller
 
         default: break
         }
@@ -73,41 +77,53 @@ class PlayerContainerController: UIViewController {
     }
 }
 
+// MARK: - PlayerLoadingViewControllerDelegate
+
+extension PlayerContainerController: PlayerLoadingViewControllerDelegate {
+
+    func controllerDidCancel(_ controller: PlayerLoadingViewController) {
+        done()
+    }
+
+    func controller(_ controller: PlayerLoadingViewController, didFinishLoadingPreviewImage image: UIImage) {
+        backgroundView.image = image
+    }
+
+    func controller(_ controller: PlayerLoadingViewController, didFinishLoadingVideo video: Video) {
+        playerViewController.video = video
+    }
+
+    func controllerLoadingVideoDidFail(_ controller: PlayerLoadingViewController) {
+        presentAlert(.videoLoadingFailed() { _ in self.done() })
+    }
+}
+
 // MARK: - PlayerViewControllerDelegate
 
 extension PlayerContainerController: PlayerViewControllerDelegate {
 
-    func controller(_ controller: PlayerViewController, loadingVideoDidFinish video: Video, playbackController: PlaybackController) {
-        overlayViewController.playbackController = playbackController
-    }
-
-    func controllerLoadingVideoDidFail(_ controller: PlayerViewController) {
-        presentAlert(.videoLoadingFailed() { _ in self.done() })
-    }
-
-    func controllerPlaybackDidFail(_ controller: PlayerViewController) {
-        presentAlert(.playbackFailed { _ in self.done() })
-    }
-}
-
-// MARK: - PlayerOverlaysControllerDelegate
-
-extension PlayerContainerController: PlayerOverlaysControllerDelegate {
-
-    func controllerDidSelectDone(_ controller: PlayerOverlaysController) {
+    func controllerDidSelectDone(_ controller: PlayerViewController) {
         done()
     }
 
-    func controllerGeneratingFrameDidFail(_ controller: PlayerOverlaysController) {
+    func controllerIsReadyForInitialPlayback(_ controller: PlayerViewController) {
+        loadingViewController.setHidden(true, animated: false)
+    }
+
+    func controllerPlaybackDidFail(_ controller: PlayerViewController) {
+        presentAlert(.playbackFailed())
+    }
+
+    func controllerGeneratingFramesDidFail(_ controller: PlayerViewController) {
         presentAlert(.imageGenerationFailed())
     }
 
-    func controller(_ controller: PlayerOverlaysController, didSelectShareFrames frames: [Frame]) {
+    func controller(_ controller: PlayerViewController, didSelectShareFrames frames: [Frame]) {
         let includeMetadata = metadataOptionProvider.includeMetadata
 
-        let images = frames
-            .map { $0.image }
-            .map { $0.jpegData(includingMetadata: includeMetadata) ?? ($0.image as Any) }
+        let images = frames.map {
+            $0.image.jpegData(includingMetadata: includeMetadata) ?? ($0.image.image as Any)
+        }
 
         let shareController = UIActivityViewController(activityItems: images, applicationActivities: nil)
         present(shareController, animated: true)
@@ -119,6 +135,9 @@ extension PlayerContainerController: PlayerOverlaysControllerDelegate {
 private extension PlayerContainerController {
 
     func configureViews() {
+        view.backgroundColor = nil
+        backgroundView.backgroundColor = nil
+        playerViewController.view.backgroundColor = nil
         configureGestures()
     }
 
@@ -137,7 +156,7 @@ private extension PlayerContainerController {
 
     @objc func handleTap(sender: UIGestureRecognizer) {
         guard sender.state == .ended else { return }
-        overlayViewController.toggleHidden(animated: true)
+        playerViewController.toggleOverlays(animated: true)
     }
 
     @objc func handleSwipeDown(sender: UIGestureRecognizer) {

@@ -39,9 +39,7 @@ class AlbumViewController: UICollectionViewController {
         guard let selectedIndexPath = collectionView?.indexPathsForSelectedItems?.first else { fatalError("Segue without selection or asset") }
 
         transitionController.prepareTransition(forSource: self, destination: destination)
-
-        let selectedAsset = dataSource.video(at: selectedIndexPath)
-        destination.videoManager = VideoManager(asset: selectedAsset)
+        destination.videoAsset = dataSource.video(at: selectedIndexPath)
     }
 }
 
