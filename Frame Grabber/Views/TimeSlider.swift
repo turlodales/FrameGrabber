@@ -128,7 +128,7 @@ public class TimeSlider: UIControl {
         scrollView.showsHorizontalScrollIndicator = false
         scrollView.showsVerticalScrollIndicator = false
         scrollView.bounces = true
-        scrollView.decelerationRate = UIScrollView.DecelerationRate.fast
+        scrollView.decelerationRate = .fast
 
         scrollView.addSubview(progressTrack)
         addSubview(scrollView)

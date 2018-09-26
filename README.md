@@ -16,7 +16,7 @@ Feedback welcome. 👍
 
 ## Building the App
 
-The app has no dependencies. Open the project in Xcode and build (Xcode 9+, Swift 4.1+).
+The app has no dependencies. Open the project in Xcode and build (Xcode 10+, Swift 4.2+).
 
 ## License
 

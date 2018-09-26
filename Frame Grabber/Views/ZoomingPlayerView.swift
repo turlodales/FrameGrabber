@@ -89,7 +89,7 @@ private extension ZoomingPlayerView {
         scrollView.scrollsToTop = false
         scrollView.showsHorizontalScrollIndicator = false
         scrollView.showsVerticalScrollIndicator = false
-        scrollView.decelerationRate = UIScrollView.DecelerationRate.fast
+        scrollView.decelerationRate = .fast
 
         scrollView.frame = bounds
         scrollView.autoresizingMask = [.flexibleWidth, .flexibleHeight]

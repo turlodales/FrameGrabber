@@ -400,7 +400,7 @@
 				004427B3215BE308008D788E /* SpinnerViewController.swift */,
 				004402012152B10B00C420CE /* Loading */,
 				004401F72152A72C00C420CE /* Player */,
-				00D43AF52151938F0065A139 /* Selected Frames */,
+				00D43AF52151938F0065A139 /* Thumbnails */,
 				00EAFDA0205FB42E0031F8A2 /* Playback */,
 			);
 			path = Player;
@@ -455,7 +455,7 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
-		00D43AF52151938F0065A139 /* Selected Frames */ = {
+		00D43AF52151938F0065A139 /* Thumbnails */ = {
 			isa = PBXGroup;
 			children = (
 				00D43AEB2151644F0065A139 /* FrameThumbnailsViewController.swift */,
@@ -464,7 +464,7 @@
 				008B8AD32155712B00AB7A52 /* FramesDataSource.swift */,
 				0040803021580590008F04EE /* AVAssetImageGenerator+Frames.swift */,
 			);
-			path = "Selected Frames";
+			path = Thumbnails;
 			sourceTree = "<group>";
 		};
 		00EAFDA0205FB42E0031F8A2 /* Playback */ = {

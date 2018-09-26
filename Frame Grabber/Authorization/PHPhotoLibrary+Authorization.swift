@@ -5,7 +5,7 @@ extension PHPhotoLibrary {
     /// Request authorization optionally opening Settings if denied or restricted.
     static func requestAuthorization(openingSettingsIfNeeded openSettings: Bool, completion: @escaping (PHAuthorizationStatus, Bool) -> ()) {
         let status = authorizationStatus()
-        let accessDenied = (status == .denied || status == .restricted)
+        let accessDenied = (status == .denied) || (status == .restricted)
 
         if accessDenied && openSettings {
             UIApplication.shared.openSettings() { didOpen in
